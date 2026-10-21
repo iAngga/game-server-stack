@@ -1,0 +1,31 @@
+# Modded Terraria (tModLoader 1.4) with Steam Workshop mods.
+services:
+  terraria:
+    image: jacobsmile/tmodloader1.4:v2026.02.3.0
+    container_name: terraria-modded
+    restart: unless-stopped
+    stdin_open: true
+    tty: true
+    ports:
+      - "7777:7777"
+    environment:
+      WORLD_NAME: "${WORLD_NAME}"
+      WORLD_SIZE: "${WORLD_SIZE:-3}"            # 1 small, 2 medium, 3 large
+      WORLD_DIFFICULTY: "${WORLD_DIFFICULTY:-1}"
+      SERVER_PASSWORD: "${SERVER_PASSWORD}"     # set explicitly, an empty value caused issues
+      # Steam Workshop mod IDs, comma-separated
+      TMOD_AUTODOWNLOAD: "${TMOD_MODS}"
+      TMOD_ENABLEDMODS: "${TMOD_MODS}"
+    volumes:
+      - ./data:/data
+
+  # Optional: a playit.gg agent just for this server.
+  # Start with: docker compose --profile playit up -d
+  # Skip it if you run the shared agent in ../playit instead.
+  playit:
+    image: ghcr.io/playit-cloud/playit-agent:0.16
+    profiles: ["playit"]
+    restart: unless-stopped
+    network_mode: host
+    environment:
+      SECRET_KEY: "${PLAYIT_SECRET_KEY:-}"

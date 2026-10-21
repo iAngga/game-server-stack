@@ -1,0 +1,10 @@
+# One playit.gg agent for every game server on this host.
+# Tunnels are created on the playit.gg dashboard and point to 127.0.0.1:<host port>.
+services:
+  playit:
+    image: ghcr.io/playit-cloud/playit-agent:0.16
+    container_name: playit-agent
+    restart: unless-stopped
+    network_mode: host
+    environment:
+      SECRET_KEY: "${PLAYIT_SECRET_KEY}"

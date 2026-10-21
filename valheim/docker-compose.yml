@@ -1,0 +1,30 @@
+# Valheim dedicated server with crossplay.
+services:
+  valheim:
+    image: lloesche/valheim-server:latest
+    container_name: valheim
+    restart: unless-stopped
+    cap_add:
+      - sys_nice
+    ports:
+      - "2456-2458:2456-2458/udp"
+    environment:
+      SERVER_NAME: "${SERVER_NAME}"
+      WORLD_NAME: "${WORLD_NAME}"
+      SERVER_PASS: "${SERVER_PASS}"   # min 5 chars, must not contain the server name
+      SERVER_PUBLIC: "false"
+      SERVER_ARGS: "-crossplay"
+    volumes:
+      - ./data/config:/config
+      - ./data/server:/opt/valheim
+
+  # Optional: a playit.gg agent just for this server.
+  # Start with: docker compose --profile playit up -d
+  # Skip it if you run the shared agent in ../playit instead.
+  playit:
+    image: ghcr.io/playit-cloud/playit-agent:0.16
+    profiles: ["playit"]
+    restart: unless-stopped
+    network_mode: host
+    environment:
+      SECRET_KEY: "${PLAYIT_SECRET_KEY:-}"

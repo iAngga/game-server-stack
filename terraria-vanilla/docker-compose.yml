@@ -1,0 +1,31 @@
+# Vanilla Terraria 1.4.5. The world is auto-created on first start.
+services:
+  terraria:
+    image: ryshe/terraria:vanilla-1.4.5.5
+    container_name: terraria-vanilla
+    restart: unless-stopped
+    stdin_open: true
+    tty: true
+    ports:
+      - "7779:7777"
+    environment:
+      T_MAXPLAYERS: "${MAX_PLAYERS:-16}"
+      T_MOTD: "${MOTD}"
+    command: >-
+      -world /root/.local/share/Terraria/Worlds/${WORLD_FILE}
+      -autocreate ${WORLD_SIZE:-2}
+      -seed ${WORLD_SEED}
+      -difficulty ${DIFFICULTY:-2}
+    volumes:
+      - ./data/worlds:/root/.local/share/Terraria/Worlds
+
+  # Optional: a playit.gg agent just for this server.
+  # Start with: docker compose --profile playit up -d
+  # Skip it if you run the shared agent in ../playit instead.
+  playit:
+    image: ghcr.io/playit-cloud/playit-agent:0.16
+    profiles: ["playit"]
+    restart: unless-stopped
+    network_mode: host
+    environment:
+      SECRET_KEY: "${PLAYIT_SECRET_KEY:-}"

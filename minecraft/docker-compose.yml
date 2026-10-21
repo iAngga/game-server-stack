@@ -1,0 +1,49 @@
+# Modded Minecraft (NeoForge 1.21.1) using itzg/minecraft-server.
+services:
+  mc:
+    image: itzg/minecraft-server:java21
+    container_name: mc
+    restart: unless-stopped
+    tty: true
+    stdin_open: true
+    mem_limit: "8g"
+    ports:
+      - "25566:25565"
+    environment:
+      EULA: "TRUE"
+      TYPE: "NEOFORGE"
+      VERSION: "1.21.1"
+      NEOFORGE_VERSION: "21.1.233"
+      DIFFICULTY: "normal"
+      SERVER_NAME: "${MC_SERVER_NAME}"
+      MOTD: "${MC_MOTD}"
+      INIT_MEMORY: "2G"
+      MAX_MEMORY: "8G"
+      ONLINE_MODE: "false"
+      ENABLE_COMMAND_BLOCK: "true"
+      # FORCE_REDOWNLOAD: "TRUE"   # turn on only when changing server/loader version
+      RCON_PASSWORD: "${RCON_PASSWORD}"
+      OPS: "${MC_OPS}"
+      # Aikar-style G1GC flags
+      JVM_OPTS: >-
+        -Dfml.queryResult=confirm
+        -XX:+UseG1GC -XX:+ParallelRefProcEnabled -XX:MaxGCPauseMillis=200
+        -XX:+UnlockExperimentalVMOptions -XX:+DisableExplicitGC
+        -XX:G1NewSizePercent=30 -XX:G1MaxNewSizePercent=40 -XX:G1HeapRegionSize=8M
+        -XX:G1ReservePercent=20 -XX:G1HeapWastePercent=5 -XX:G1MixedGCCountTarget=4
+        -XX:InitiatingHeapOccupancyPercent=15 -XX:G1MixedGCLiveThresholdPercent=90
+        -XX:G1RSetUpdatingPauseTimePercent=5 -XX:SurvivorRatio=32
+        -XX:+PerfDisableSharedMem -XX:MaxTenuringThreshold=1
+    volumes:
+      - ./data:/data
+
+  # Optional: a playit.gg agent just for this server.
+  # Start with: docker compose --profile playit up -d
+  # Skip it if you run the shared agent in ../playit instead.
+  playit:
+    image: ghcr.io/playit-cloud/playit-agent:0.16
+    profiles: ["playit"]
+    restart: unless-stopped
+    network_mode: host
+    environment:
+      SECRET_KEY: "${PLAYIT_SECRET_KEY:-}"
